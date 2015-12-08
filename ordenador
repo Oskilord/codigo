@@ -1,0 +1,331 @@
+#ifndef ORDENADOR_H
+#define ORDENADOR_H
+#include <iostream>
+#include <cstdlib>
+#include <cmath>
+#include "time.h"
+#include <algorithm>
+#include<climits>
+using namespace std;
+
+class Ordenador{
+	private:
+
+    void Merge(int arreglo[], int izq, int medio, int der){
+
+        int temp[40000];
+        int i, izq_fin, num_elementos, tmp_pos;
+
+        izq_fin = (medio - 1);
+        tmp_pos = izq;
+        num_elementos = (der - izq + 1);
+
+        while ((izq <= izq_fin) && (medio <= der)){
+
+            if (arreglo[izq] <= arreglo[medio]){
+                temp[tmp_pos++] = arreglo[izq++];
+            }
+
+            else{
+                temp[tmp_pos++] = arreglo[medio++];
+            }
+        }
+
+        while (izq <= izq_fin)
+
+        temp[tmp_pos++] = arreglo[izq++];
+
+
+
+        while (medio <= der)
+            temp[tmp_pos++] = arreglo[medio++];
+
+        for (i=0; i < num_elementos; i++){
+            arreglo[der--] = temp[der];
+        }
+    }
+
+    void MergeRango(int arreglo[], int izq, int der) {
+
+        int medio;
+        if (der > izq){
+
+        medio = (der + izq) / 2;
+
+        MergeRango(arreglo, izq, medio);
+
+        MergeRango(arreglo, (medio+1), der);
+
+        Merge(arreglo, izq, (medio+1), der);
+
+        }
+
+    }
+
+    /////////////////////SEGUNDA TAREA///////////////////////////
+
+    void corregirCima(int* arreglo, int bajo, int alto) {
+        int raiz = bajo;
+        while ((raiz*2)+1 <= alto) {
+            int hijoizquierdo = (raiz * 2) + 1;
+            int hijoderecho = hijoizquierdo + 1;
+            int swapIdx = raiz;
+
+            if (arreglo[swapIdx] < arreglo[hijoizquierdo]){
+                swapIdx = hijoizquierdo;
+            }
+
+            if ((hijoderecho <= alto) && (arreglo[swapIdx] < arreglo[hijoderecho])){
+                swapIdx = hijoderecho;
+            }
+
+            if (swapIdx != raiz){
+                int tmp = arreglo[raiz];
+                arreglo[raiz] = arreglo[swapIdx];
+                arreglo[swapIdx] = tmp;
+                raiz = swapIdx;
+            }
+            else {
+            break;
+            }
+        }
+        return;
+    }
+    void monticularizar(int* arreglo, int bajo, int alto) {
+
+        int midIdx = (alto - bajo -1)/2;
+        while (midIdx >= 0) {
+            corregirCima(arreglo, midIdx, alto);
+            --midIdx;
+        }
+        return;
+    }
+
+
+    void quicksortaux(int* arreglo, int principio, int fin) {
+        if ( principio < fin ) {
+            //encuentra el pivote
+            int j = particion(arreglo, principio, fin);
+            quicksortaux(arreglo, principio, j-1);
+            quicksortaux(arreglo, j+1, fin);
+        }
+    }
+
+    //encuentra y devuelve el pivote
+    int particion(int* arreglo, int principio, int fin) {
+        int pivote = arreglo[fin];
+
+        while ( principio < fin ) {
+            while ( arreglo[principio] < pivote ){
+                principio++;
+            }
+            while ( arreglo[fin] > pivote ){
+                fin--;
+            }
+            if ( arreglo[principio] == arreglo[fin] )
+                principio++;
+            else if ( principio < fin ) {
+                int tmp = arreglo[principio];
+                arreglo[principio] = arreglo[fin];
+                arreglo[fin] = tmp;
+            }
+        }
+
+        return fin;
+    }
+
+//METODOS DE MEDIANA
+    int seleccionRandom(int * arreglo, int inicio, int fin, int i) {
+        if (inicio == fin) {
+            //return arreglo[inicio];
+			return inicio;
+		}
+        int q = particion1(arreglo, inicio, fin);
+        int k = q - inicio+1;
+        if (i == k) {
+            return q;
+			//return arreglo[q];
+        }
+        else if(i < k) {
+            return seleccionRandom(arreglo, inicio, q-1, i);
+        }
+        else {
+            return seleccionRandom(arreglo, q+1, fin, i-k);
+        }
+    }
+
+
+    int particion1(int * arreglo, int inicio, int fin) {
+        int x = arreglo[inicio];
+        int i = inicio;
+        for (int j = inicio+1; j<= fin; j++) {
+            if (arreglo[j] < x) {
+                i = i+1;
+                swap(arreglo[i], arreglo[j]);
+            }
+        }
+        swap(arreglo[i], arreglo[inicio]);
+        return i;
+    }
+
+
+
+
+
+
+	//Defina aqu’ los mŽtodos auxiliares de los algoritmos de ordenamiento solamente.
+    //Puede definir cuantos mŽtodos quiera.
+//////////////////////////////////////////////////////////////////////////////////
+	public:
+
+	Ordenador(){};
+	~Ordenador(){};
+
+	//Si piensa no implementar algunos de los mŽtodos de ordenamiento, no los borre,
+	//simplemente dŽjelos con el cuerpo vac’o para evitar errores de compilaci—n, ya
+	//que se va a ejecutar el mismo ÔmainÕ para todas las tareas.
+	//void seleccion(int * arreglo, int tamano){};
+	//void insercion(int * arreglo, int tamano){};
+    //void mergesort(int * arreglo, int tamano){};
+	//void heapsort(int * arreglo, int tamano){};
+	//void quicksort(int * arreglo, int tamano){};
+	//void radixsort(int * arreglo, int tamano){};
+	//int mediana(int * arreglo, int tamano){};
+
+
+
+    void seleccion(int * arreglo, int tamano) {
+
+        int minimo,temp;
+
+        for (int i=0; i < tamano-1; i++) {
+            minimo = i;
+
+            for (int j=i+1; j < tamano-1; j++) {
+
+                if (arreglo[j] < arreglo[minimo]){
+                   minimo=j;
+                }
+
+            }
+
+            if (minimo != i){
+                 temp = arreglo[i];
+                 arreglo[i] = arreglo[minimo];
+                 arreglo[minimo] = temp;
+            }
+        }
+    }
+
+    void insercion(int * arreglo, int tamano){
+        int i, j ,tmp;
+        for (i = 1; i < tamano; i++) {
+            j = i;
+            while (j > 0 && arreglo[j - 1] > arreglo[j]) {
+                tmp = arreglo[j];
+                arreglo[j] = arreglo[j - 1];
+                arreglo[j - 1] = tmp;
+                j--;
+            }
+        }
+    }
+
+    void mergesort(int * arreglo, int tamano){
+
+        MergeRango(arreglo, 0, tamano - 1);
+
+    }
+
+    void heapsort(int * arreglo, int tamano){
+
+
+    //Pone el elemento más grande como raíz
+        monticularizar(arreglo, 0, tamano-1);
+        int alto = tamano - 1;
+        while (alto > 0){
+        //Intercambia la raiz con el último elemento del arreglo
+        int tmp = arreglo[alto];
+        arreglo[alto] = arreglo[0];
+        arreglo[0] = tmp;
+        --alto;
+        corregirCima(arreglo, 0, alto);
+        }
+        return;
+
+    }
+
+    void quicksort(int * arreglo, int tamano){
+    cout<<"Quicksort"<<endl;
+    quicksortaux(arreglo,0,tamano-1);
+
+    }
+
+
+    void radixsort(int * arreglo, int tamano){
+
+        int maximo = 0;
+
+        for (int i = 0; i < tamano; i++){
+
+            if (arreglo[i] > maximo)
+                maximo = arreglo[i];
+
+        }
+
+        maximo++;
+
+        int* B = new int[tamano];
+        int* C = new int[maximo];
+
+        for (int i = 0; i < maximo; i++){
+
+            int contador = 0;
+
+            for (int j = 0; j < tamano; j++){
+
+                if (i == arreglo[j])
+                    contador++;
+
+            }
+
+            C[i] = contador;
+
+        }
+
+        int monton = 0;
+
+        for (int i = 0; i < maximo; i++){
+
+            monton += C[i];
+            C[i] = monton;
+
+        }
+
+        for (int j = tamano; j > 0; j--){
+
+            int indC = arreglo[j - 1];
+            int indB = C[indC];
+            B[indB - 1] = arreglo[j - 1];
+            C[indC]--;
+
+        }
+
+        for (int i = 0; i < tamano; i++){
+            arreglo[i] = B[i];
+        }
+
+
+
+    }
+
+
+
+    int mediana(int * arreglo, int tamano){
+        int m = seleccionRandom(arreglo, 0, tamano-1, tamano/2);
+        //cout<<"La posicion de la mediana es: "<<m<<endl;
+        return m;
+    }
+
+
+};
+#endif
