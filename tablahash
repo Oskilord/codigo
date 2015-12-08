@@ -1,0 +1,66 @@
+#ifndef HASH_CLASS
+#define HASH_CLASS
+#include <list>
+#include <vector>
+#include <algorithm>
+
+template <typename T>
+class hash{
+	public:
+		hash(int nEntradas){
+            numEntradas = nEntradas;
+            tabla = std::vector<std::list<T>>(nEntradas);
+		};
+			// Constructor que especifica el numero de cubetas (entradas)
+			// en la tabla
+
+		hash(const hash<T>& obj){
+		    int n = obj.numEntradas;
+		    tabla = std::vector<std::list<T>>(obj.numEntradas);
+            numEntradas = obj.numEntradas;
+            std::list<T> l;
+            for(int i = 0; i < obj.numEntradas; i++){
+                l = obj.tabla[i];
+                for(std::list<int>::iterator a = l.begin(); a != l.end(); a++){
+                    tabla[i].push_back(*a);
+                }
+            }
+
+		};
+			// Constructor copia
+
+		~hash(){
+		//    delete tabla;
+		};
+			// Destructor (borra la tabla)
+
+		T* search(const T& item){
+		    int n = funcionHash(item);
+            if(*find(tabla[n].begin(), tabla[n].end(), item)!=item){
+                return NULL;
+            }
+            return &*find(tabla[n].begin(), tabla[n].end(), item) ;
+		};
+			// Retorna un puntero a la llave o NULL si no se encuentra
+
+		void insert(const T& item){
+		    tabla[funcionHash(item)].push_back(item);
+		};
+
+			// Inserta el elemento en la tabla
+	private:
+		int numEntradas;
+			// Nœmero de entradas en la tabla
+		std::vector<std::list<T> > tabla;
+			// La tabla es un vector de listas de STL
+
+        int funcionHash(const T& n){
+            return n % numEntradas;
+
+        }
+
+};
+
+
+
+#endif
