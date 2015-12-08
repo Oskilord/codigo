@@ -1,2 +1,2 @@
 # codigo
-Código a analizar.
+Código a analizar. Hay algoritmos de ordenamiento y estructuras de datos.
