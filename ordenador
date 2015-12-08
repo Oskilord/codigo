@@ -28,6 +28,7 @@ class Ordenador{
 
             else{
                 temp[tmp_pos++] = arreglo[medio++];
+                
             }
         }
 
