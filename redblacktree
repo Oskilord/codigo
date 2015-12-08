@@ -8,7 +8,7 @@ enum colors {RED, BLACK};
 template <typename T>
 class rbnode{
    public:
-		// Esta clase es para ser usada por otras clases.
+	// Esta clase es para ser usada por otras clases.
   	// Por eficiencia se hacen los atributos publicos.
 		T key;
 		rbnode<T> *p, *left, *right;
