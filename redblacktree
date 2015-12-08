@@ -1,0 +1,386 @@
+#ifndef RED_BLACK_rbtree
+#define RED_BLACK_rbtree
+#include <stack>
+#include <iostream>
+enum colors {RED, BLACK};
+
+// Nodos del arbol:
+template <typename T>
+class rbnode{
+   public:
+		// Esta clase es para ser usada por otras clases.
+  	// Por eficiencia se hacen los atributos publicos.
+		T key;
+		rbnode<T> *p, *left, *right;
+		colors color;
+
+		// Constructor por omision.
+		rbnode(): left(this), right(this), p(this), color(RED){
+		};
+
+		// Constructor por copia del nodo.
+		rbnode(const rbnode<T> * obj, const rbnode<T> * objNil, rbnode<T> * parent, rbnode<T> * nilPtr){
+		}
+
+      // Inicializacion de datos miembro.
+		rbnode (const T& k, rbnode<T> *w = nullptr, rbnode<T> *y = nullptr,
+				 rbnode<T> *z = nullptr,enum colors c = RED):
+					key(k), p(w), left(y), right(z), color(c)
+		{};
+
+		~rbnode(){
+
+		}
+};
+
+// Arbol:
+template <typename T>
+class rbtree{
+	public:
+		rbtree() {
+            nil = new rbnode<int>();
+            root = nil;
+		    nil->color = BLACK;
+		};
+			// Constructor (crea un arbol vacio)
+
+		rbtree(const rbtree<T>& obj) {
+            nil = new rbnode<int>();
+            root = nil;
+		    nil->color = BLACK;
+		    bool insertado;
+		    rbnode<T>* n;
+		    std::stack<rbnode<T>*> pila;
+		    pila.push(obj.root);
+		    while(pila.empty() == false) {
+                n = pila.top();
+                pila.pop();
+                if(n->left != obj.nil) {
+                    pila.push(n->left);
+                }
+                if(n->right != obj.nil) {
+                    pila.push(n->right);
+                }
+		        insertado = false;
+                rbnode<T>* insertar = new rbnode<T>(n->key);
+                insertar->color = n->color;
+                insertar->right = nil;
+                insertar->left = nil;
+                n = getRoot();
+                while(insertado == false) {
+                    if(root == nil) {
+                        root = insertar;
+                        insertado = true;
+                    }
+                    else {
+                        if(insertar->key > n->key) {
+                            if(n->right == nil) {
+                                n->right = insertar;
+                                insertar->p = n;
+                                insertado = true;
+                            }
+                            else {
+                                n = n->right;
+                            }
+                        }
+                        else {
+                            if(n->left == nil){
+                                n->left = insertar;
+                                insertar->p = n;
+                                insertado = true;
+                            }
+                            else {
+                                 n = n->left;
+                            }
+                        }
+                    }
+                }
+		    }
+		};
+			// Constructor copia
+
+		~rbtree() {
+            std::stack<rbnode<T>*> borrar;
+            borrar.push(root);
+            rbnode<T>* n;
+            while(borrar.empty() == false) {
+                n = borrar.top();
+                borrar.pop();
+                if(n->left != nil) {
+                    borrar.push(n->left);
+                }
+                if(n->right != nil) {
+                    borrar.push(n->right);
+                }
+                delete n;
+            }
+		};
+			// Destructor (borra el arbol)
+
+		void inorderTreeWalk(rbnode<T>* x, std::stack<T> & pila){
+		    if(x->right != nil){
+                inorderTreeWalk(x->left, pila);
+                int i = x->key;
+                pila.push(i);
+
+
+                if(x->color == BLACK){
+                    pila.push(1);
+                }
+                else{
+                    pila.push(0);
+                }
+                // cout<<"Llave: "<<x->key<<endl;
+                inorderTreeWalk(x->right, pila);
+		    }
+
+		};
+            // Efectua un recorrido en orden del subarbol cuya ra’z es apuntada
+            // por x. En cada visita apila la llave de cada nodo y su color.
+            // Es decir, cada vez que se llega a un nodo se ejecutan las
+            // instrucciones pila.push(x->key); y luego pila.push(colorDeX).
+            // Para efectos de la tarea, si el color del nodo es rojo,
+            // ponga en la pila un 0, y si es negro, ponga un 1.
+            // Si se hace correctamente, al finalizar el mŽtodo la pila deber’a
+            // contener las llaves de los nodos del sub‡rbol (y su color)
+            // ordenadas de mayor a menor.
+
+		rbnode<T>* treeSearch(const T& k){
+		    return treeSearchAux(this->getRoot(),k);
+		};
+			// Busca la llave recursivamente, si la encuentra devuelve un
+            // puntero al nodo que la contiene, sino devuelve NULL.
+
+		rbnode<T>* iterativeTreeSearch(const T& k){
+		    rbnode<T> *nodo = this->getRoot();
+		    while(nodo != nil && k != nodo->key){
+                if(k < nodo->key){
+                    nodo = nodo->left;
+                }
+                else{
+                    nodo = nodo->right;
+                }
+		    }
+		    if(nodo == nil){
+                return NULL;
+		    }
+		    else{
+		    return nodo;
+		    }
+		};
+			// Igual que en el anterior pero usa un procedimiento iterativo.
+
+		rbnode<T>* treeMinimum(){
+            rbnode<T> *nodo = this->getRoot();
+            while(nodo->right != nil){
+                nodo = nodo->left;
+            }
+		    return nodo;
+		};
+			// Devuelve el nodo con la llave menor.
+            // Si el arbol esta vacio devuelve NULL.
+
+		rbnode<T>* treeMaximum(){
+		    rbnode<T> *nodo = this->getRoot();
+		    while (nodo->right != nil){
+                nodo = nodo->right;
+		    }
+		    return nodo;
+		};
+			// Devuelve el nodo con la llave mayor.
+            // Si el arbol esta vacio devuelve NULL.
+
+		rbnode<T>* treeSuccessor(const rbnode<T>* x){
+		    if(x->right != nil){
+                return treeMinimum(x->right);
+		    }
+		    rbnode<T> *y = x->p;
+		    while( y =! nil && x == y->right){
+                x = y;
+                y = y->p;
+		    }
+		    return y;
+		};
+			// Devuelve el nodo cuya llave es la siguiente mas grande que
+            // la del nodo x. Si no existe tal nodo devuelve NULL.
+
+		void treeInsert(rbnode<T>* z){
+		   // cout<<"insertando"<< z->key<<endl;
+		    rbnode<T>* n = nil;
+		    rbnode<T>* r = root;
+		    while(r != nil) {
+                n = r;
+                if(z->key < r->key){
+                    r = r->left;
+                }
+                else {
+                    r = r->right;
+                }
+		    }
+		    z->p = n;
+		    if(n == nil ) {
+                root = z;
+                root-> p = nil;
+		    }
+		    else {
+                T a;
+                if(z->key < n->key) {
+                    a = n->key;
+                    n->left = z;
+                }
+                else {
+                    a = n->key;
+                    n->right = z;
+                }
+		    }
+		    z->left = nil;
+		    z->right = nil;
+		    z->color = RED;
+		    fixup(z);
+		    //cout<<"YA"<<endl;
+
+		     //aux es y, actual es x.
+		};
+			// Inserta el nodo z en la posicion que le corresponde en el arbol.
+
+		rbnode<T>* treeDelete(rbnode<T>* z){
+
+		    // NO SE IMPLEMENTA PARAESTA TAREA
+		};
+			// Saca del arbol la llave contenida en el nodo apuntado por z.
+			// Devuelve la direccion del nodo eliminado para que se pueda
+			// disponer de el.
+
+		rbnode<T> * getRoot(){
+			return this->root;
+		};
+
+		// Devuelve la raiz del arbol. (Para efectos de revision de la tarea).
+
+		rbnode<T> * getNil(){
+			return this->nil;
+		};
+		// Devuelve T.nil. (Para efectos de revision de la tarea).
+
+		private:
+
+		rbnode<T> *root;	// raiz del arbol
+		rbnode<T> *nil;	    // nodo nil (hoja) del arbol
+
+		rbnode<T>* treeSearchAux(rbnode<T>* x, const T& k){
+		    rbnode<T>* nodo;
+		    if(x == nil || x->key == k){
+                return x;
+		    }
+		    if(k < x->key){
+                nodo = treeSearchAux(x->left,k);
+		    }
+		    else{
+                nodo = treeSearchAux(x->right,k);
+		    }
+
+		    if(nodo == nil) {
+                nodo = NULL;
+		    }
+		    return nodo;
+
+		};
+
+		void addNil(rbnode<T>*x){
+            x->left = nil;
+            x->right = nil;
+            x->p = nil;
+		}
+
+		void leftRotate(rbnode<T>* n){
+            rbnode<T>* n2 = n->right;
+		    n->right = n2->left;
+		    if(n2->left != nil) {
+                n2->left->p = n;
+
+		    }
+		    n2->p = n->p;
+		    if(n->p == nil) {
+                root = n2;
+		    }
+		    else {
+                if(n == n->p->left) {
+                    n->p->left = n2;
+                }
+                else {
+                    n->p->right = n2;
+                }
+		    }
+		    n2->left = n;
+		    n->p = n2;
+		}
+
+		void rightRotate (rbnode<T>* n){
+            rbnode<T> *n2 = n->left;
+		    n->left = n2->right;
+		    if(n2->right != nil) {
+                n2->right->p = n;
+		    }
+		    n2->p = n->p;
+		    if(n->p == nil) {
+                root = n2;
+		    }
+		    else {
+                if(n == n->p->right){
+                    n->p->right = n2;
+                }
+                else {
+                    n->p->left = n2;
+                }
+		    }
+		    n2->right = n;
+		    n->p = n2;
+        }
+
+        void fixup(rbnode<T> *n){
+            while((n->color == RED) && (n->p->color == RED)) {
+                if( n->p == n->p->p->left) {
+                    rbnode<T>* y = n->p->p->right;
+                    if(y->color == RED) {
+                        n->p->color = BLACK;
+                        y->color = BLACK;
+                        n->p->p->color = RED;
+                        n = n->p->p;
+                    }
+                    else {
+                        if(n == n->p->right) {
+                            n = n->p;
+                            leftRotate(n);
+                        }
+                        n->p->color = BLACK;
+                        n->p->p->color = RED;
+                        rightRotate(n->p->p);
+                    }
+                }
+                else {
+                    rbnode<T>* y = n->p->p->left;
+                    if(y->color == RED) {
+                        n->p->color = BLACK;
+                        y->color = BLACK;
+                        n->p->p->color = RED;
+                        n = n->p->p;
+                    }
+                    else {
+                        if(n == n->p->left){
+                            n = n->p;
+                            rightRotate(n);
+                        }
+                        n->p->color = BLACK;
+                        n->p->p->color = RED;
+                        leftRotate(n->p->p);
+                    }
+                }
+		    }
+		    root->color = BLACK;
+        }
+
+
+
+};
+
+#endif	// RED_BLACK_rbtree
